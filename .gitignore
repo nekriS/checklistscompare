@@ -3,6 +3,7 @@
 
 *~
 *.autosave
+*.spec
 *.a
 *.core
 *.moc
@@ -36,6 +37,10 @@ Thumbs.db
 /.qmake.stash
 /data
 .qtcreator/
+/dist
+dist/
+build/
+/build
 
 # qtcreator generated files
 *.pro.user*

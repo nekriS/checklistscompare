@@ -108,6 +108,7 @@ class Ui_MainWindow(object):
         self.label_14.setGeometry(QRect(10, 20, 171, 21))
         self.checkBox = QCheckBox(self.groupBox)
         self.checkBox.setObjectName(u"checkBox")
+        self.checkBox.setEnabled(False)
         self.checkBox.setGeometry(QRect(210, 20, 76, 20))
         self.checkBox_2 = QCheckBox(self.groupBox)
         self.checkBox_2.setObjectName(u"checkBox_2")
