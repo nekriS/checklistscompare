@@ -68,6 +68,7 @@ class MainWindow(QMainWindow):
 
 
     def compare_function(self):
+        print("1")
         pass
 
 
