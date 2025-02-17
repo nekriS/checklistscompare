@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>650</width>
-    <height>330</height>
+    <height>402</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>650</width>
-    <height>330</height>
+    <height>402</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>650</width>
-    <height>330</height>
+    <height>402</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -43,6 +43,9 @@
       <width>181</width>
       <height>24</height>
      </rect>
+    </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Файл чеклиста, который был проверен и отослан обратно исполнителю на доработку.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
     </property>
     <property name="text">
      <string>Выбрать файл</string>
@@ -151,6 +154,9 @@
       <height>24</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Файл, который прислал исполнитель с комментариями.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="text">
      <string>Выбрать файл</string>
     </property>
@@ -232,6 +238,9 @@
       <height>24</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Файл, который сформировал исполнитель, после того как внес все изменения.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
     <property name="text">
      <string>Выбрать файл</string>
     </property>
@@ -299,6 +308,9 @@
        <height>22</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Если выбран конкретный исполнитель, то сравнение произойдет только у тех компонентов, за которые он отвечает.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <item>
       <property name="text">
        <string>KNS</string>
@@ -363,11 +375,14 @@
        <height>20</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Активирует сравнение на листах распиновок компонентов.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
       <string>Schematic</string>
      </property>
      <property name="checked">
-      <bool>false</bool>
+      <bool>true</bool>
      </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_3">
@@ -379,8 +394,39 @@
        <height>20</height>
       </rect>
      </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Активирует сравнение на листах параметров компонентов из базы данных.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
      <property name="text">
       <string>DB</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+    <widget class="QCheckBox" name="find_row">
+     <property name="geometry">
+      <rect>
+       <x>380</x>
+       <y>40</y>
+       <width>151</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:700;&quot;&gt;Работает только для листов распиновки!&lt;/span&gt;&lt;br/&gt;Полезно, если пины на листах разных файлов идут в разном порядке. Активириует поиск по номеру пина.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="whatsThis">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Поиск по номеру</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
      </property>
     </widget>
    </widget>
@@ -406,6 +452,18 @@
       <height>22</height>
      </rect>
     </property>
+    <property name="toolTip">
+     <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Название выходного файла без расширения:&lt;br/&gt;*.xlsx&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+    </property>
+    <property name="toolTipDuration">
+     <number>-1</number>
+    </property>
+    <property name="statusTip">
+     <string/>
+    </property>
+    <property name="whatsThis">
+     <string/>
+    </property>
     <property name="text">
      <string>output_checklist</string>
     </property>
@@ -425,6 +483,45 @@
     <property name="text">
      <string>Имя выходного файла:</string>
     </property>
+   </widget>
+   <widget class="QGroupBox" name="groupBox_2">
+    <property name="geometry">
+     <rect>
+      <x>9</x>
+      <y>300</y>
+      <width>631</width>
+      <height>71</height>
+     </rect>
+    </property>
+    <property name="title">
+     <string>Резюме</string>
+    </property>
+    <widget class="QLabel" name="no_label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>20</y>
+       <width>241</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Количество &quot;Нет&quot;:</string>
+     </property>
+    </widget>
+    <widget class="QLabel" name="yes_label">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>40</y>
+       <width>241</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Количество &quot;Да&quot;:</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

@@ -30,7 +30,19 @@ def mas_no_mas(massive):
             out_massive.append(el[0])
     return out_massive
 
-def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow):
+
+def findrow(sheet, number, start_row, end_row):
+    row = -1
+    for row in range(start_row, end_row):
+        if sheet.cell(row=row, column=3).value == number:
+            return row
+    return row
+
+def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow, find_allow):
+
+    no = 0
+    yes = 0
+
     workbook = openpyxl.load_workbook(path_1)
     workbook_middle = openpyxl.load_workbook(path_2)
     workbook_end = openpyxl.load_workbook(path_3)
@@ -66,9 +78,10 @@ def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_all
             part_number = sheet["B1"].value
 
             if part_number in PNs:
+
                 #data = read_cell_range(sheet, 8, 54, 1, 4)
-                sheet_end.cell(row=7, column=5).value = "Прошлое значение"
-                sheet_end.cell(row=7, column=6).value = "Прошлый комментарий"
+                sheet_end.cell(row=7, column=5).value = "1. Значение"
+                sheet_end.cell(row=7, column=6).value = "2. Комментарий"
 
                 for row in range(8, 60):
 
@@ -112,52 +125,109 @@ def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_all
             part_number = sheet["B1"].value
 
             if part_number in PNs:
-                #data = read_cell_range(sheet, 8, 54, 1, 4)
-                sheet_end.cell(row=16, column=7).value = "Прошлое Name"
-                sheet_end.cell(row=16, column=8).value = "Прошлый Type"
-                sheet_end.cell(row=16, column=9).value = "Прошлый комментарий"
 
-                for row in range(17, 500):
+                # проверка шапки
+                sheet_end.cell(row=7, column=5).value = "1. Значение"
+                sheet_end.cell(row=7, column=6).value = "1. Комментарий"
+                for row in range(8, 12):
+
+                    cell_value = sheet.cell(row=row, column=1).value
+
+                    if cell_value != None:
+                        if cell_value == "Да":
+                            value_first = sheet.cell(row=row, column=4).value
+                            value_end = sheet_end.cell(row=row, column=4).value
+                            if value_first == value_end:
+                                sheet_end.cell(row=row, column=1).value = "Да"
+                            else:
+                                sheet_end.cell(row=row, column=1).value = "Нет"
+                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
+
+                                if "Проверяется соответствие " in sheet.cell(row=row, column=2).value:
+                                    sheet_end.cell(row=row, column=6).value = sheet.cell(row=row, column=5).value
+                                else:
+                                    sheet_end.cell(row=row, column=6).value = str(sheet.cell(row=row, column=2).value) + " " + str(sheet.cell(row=row, column=5).value)
+
+                        elif cell_value == "Нет":
+                            value_first = sheet.cell(row=row, column=4).value
+                            value_end = sheet_end.cell(row=row, column=4).value
+                            if value_first == value_end:
+                                sheet_end.cell(row=row, column=1).value = "Нет"
+                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
+
+                                if "Проверяется соответствие " in sheet.cell(row=row, column=2).value:
+                                    sheet_end.cell(row=row, column=6).value = sheet.cell(row=row, column=5).value
+                                else:
+                                    sheet_end.cell(row=row, column=6).value = str(sheet.cell(row=row, column=2).value) + " " + str(sheet.cell(row=row, column=5).value)
+
+                            else:
+                                sheet_end.cell(row=row, column=1).value = "Не проверено"
+                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
+
+                                if "Проверяется соответствие " in sheet.cell(row=row, column=2).value:
+                                    sheet_end.cell(row=row, column=6).value = sheet.cell(row=row, column=5).value
+                                else:
+                                    sheet_end.cell(row=row, column=6).value = str(sheet.cell(row=row, column=2).value) + " " + str(sheet.cell(row=row, column=5).value)
+
+
+
+                # проверка распиновки, максимум 500 строк
+                max_strings = 500
+                sheet_end.cell(row=16, column=7).value = "1. Name"
+                sheet_end.cell(row=16, column=8).value = "1. Type"
+                sheet_end.cell(row=16, column=9).value = "2. Комментарий"
+
+                for row in range(17, max_strings):
 
                     cell_value = sheet.cell(row=row, column=1).value
 
                     if cell_value != None:
 
+                        if find_allow:
+                            row_3 = findrow(sheet_end, sheet.cell(row=row, column=3).value, 17, max_strings)
+                        else:
+                            row_3 = row
+                        #print(row);
+                        #print(row_3);
                         if cell_value == "Да":
                             value_name_first = sheet.cell(row=row, column=4).value
-                            value_name_end = sheet_end.cell(row=row, column=4).value
+                            value_name_end = sheet_end.cell(row=row_3, column=4).value
 
                             value_type_first = sheet.cell(row=row, column=5).value
-                            value_type_end = sheet_end.cell(row=row, column=5).value
+                            value_type_end = sheet_end.cell(row=row_3, column=5).value
 
                             if (value_name_first == value_name_end) and (value_type_first == value_type_end):
-                                sheet_end.cell(row=row, column=1).value = "Да"
+                                sheet_end.cell(row=row_3, column=1).value = "Да"
+                                yes += 1
                             else:
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=7).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=8).value = sheet_middle.cell(row=row, column=5).value
-                                sheet_end.cell(row=row, column=9).value = sheet_middle.cell(row=row, column=2).value
+                                sheet_end.cell(row=row_3, column=1).value = "Нет"
+                                sheet_end.cell(row=row_3, column=7).value = sheet.cell(row=row, column=4).value
+                                sheet_end.cell(row=row_3, column=8).value = sheet_middle.cell(row=row, column=5).value
+                                sheet_end.cell(row=row_3, column=9).value = sheet_middle.cell(row=row, column=2).value
+                                no += 1
                         elif cell_value == "Нет":
                             value_name_first = sheet.cell(row=row, column=4).value
-                            value_name_end = sheet_end.cell(row=row, column=4).value
+                            value_name_end = sheet_end.cell(row=row_3, column=4).value
 
                             value_type_first = sheet.cell(row=row, column=5).value
-                            value_type_end = sheet_end.cell(row=row, column=5).value
+                            value_type_end = sheet_end.cell(row=row_3, column=5).value
 
                             if (value_name_first == value_name_end) and (value_type_first == value_type_end):
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=7).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=8).value = sheet_middle.cell(row=row, column=5).value
-                                sheet_end.cell(row=row, column=9).value = sheet_middle.cell(row=row, column=2).value
+                                sheet_end.cell(row=row_3, column=1).value = "Нет"
+                                sheet_end.cell(row=row_3, column=7).value = sheet.cell(row=row, column=4).value
+                                sheet_end.cell(row=row_3, column=8).value = sheet_middle.cell(row=row, column=5).value
+                                sheet_end.cell(row=row_3, column=9).value = sheet_middle.cell(row=row, column=2).value
+                                no += 1
                             else:
                                 #sheet_end.cell(row=row, column=1).value = "Не проверено"
-                                sheet_end.cell(row=row, column=7).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=8).value = sheet_middle.cell(row=row, column=5).value
-                                sheet_end.cell(row=row, column=9).value = sheet_middle.cell(row=row, column=2).value
+                                sheet_end.cell(row=row_3, column=7).value = sheet.cell(row=row, column=4).value
+                                sheet_end.cell(row=row_3, column=8).value = sheet_middle.cell(row=row, column=5).value
+                                sheet_end.cell(row=row_3, column=9).value = sheet_middle.cell(row=row, column=2).value
 
     #output_file_path = 'example_updated.xlsx'
     workbook_end.save(output_file_path)
-    pass
+
+    return [no, yes]
 
 if __name__ == "__main__":
 
@@ -167,143 +237,4 @@ if __name__ == "__main__":
 
     checker = ""
 
-    workbook = openpyxl.load_workbook(path_1)
-    workbook_middle = openpyxl.load_workbook(path_2)
-    workbook_end = openpyxl.load_workbook(path_3)
-
-    sheet_names = workbook.sheetnames
-
-    main_sheet = workbook.worksheets[0]
-
-    PNs = mas_no_mas(read_cell_range(main_sheet, 8, 50, 2, 2))
-    CHs = mas_no_mas(read_cell_range(main_sheet, 8, 50, 6, 6))
-
-    # определяем компоненты которые нужно проверить по параметру "кто проверяет"
-    for ch_n in reversed(range(len(CHs))):
-        if CHs[ch_n] != checker:
-            PNs.pop(ch_n)
-    
-    #print(PNs)
-    #print(CHs)
-
-    for sheet_name in sheet_names:
-        if " DB" in sheet_name:
-            #print(sheet_name)
-            sheet = workbook[sheet_name]  # Получение объекта листа по имени
-            sheet_middle = workbook_middle[sheet_name]
-
-            try:
-                sheet_end = workbook_end[sheet_name]  # Получение объекта листа по имени
-            except:
-                print("Листа " + sheet_name + " не обнаружено!")
-                continue
-
-            part_number = sheet["B1"].value
-
-            if part_number in PNs:
-                #data = read_cell_range(sheet, 8, 54, 1, 4)
-                sheet_end.cell(row=7, column=5).value = "Прошлое значение"
-                sheet_end.cell(row=7, column=6).value = "Прошлый комментарий"
-
-                for row in range(8, 60):
-                    
-                    cell_value = sheet.cell(row=row, column=1).value
-
-                    if cell_value != None:
-                    
-                        if cell_value == "Да":
-                            value_first = sheet.cell(row=row, column=4).value
-                            value_end = sheet_end.cell(row=row, column=4).value
-                            if value_first == value_end:
-                                sheet_end.cell(row=row, column=1).value = "Да"
-                            else:
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=6).value = sheet_middle.cell(row=row, column=2).value
-                        else:
-                            value_first = sheet.cell(row=row, column=4).value
-                            value_end = sheet_end.cell(row=row, column=4).value
-                            if value_first == value_end:
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=6).value = sheet_middle.cell(row=row, column=2).value
-                            else:
-                                #sheet_end.cell(row=row, column=1).value = "Не проверено"
-                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=6).value = sheet_middle.cell(row=row, column=2).value
-
-
-        if " Sch" in sheet_name:
-            print(sheet_name)
-            sheet = workbook[sheet_name]  # Получение объекта листа по имени
-            sheet_middle = workbook_middle[sheet_name]
-
-            try:
-                sheet_end = workbook_end[sheet_name]  # Получение объекта листа по имени
-            except:
-                print("Листа " + sheet_name + " не обнаружено!")
-                continue
-
-            part_number = sheet["B1"].value
-
-            if part_number in PNs:
-                #data = read_cell_range(sheet, 8, 54, 1, 4)
-                sheet_end.cell(row=16, column=7).value = "Прошлое Name"
-                sheet_end.cell(row=16, column=8).value = "Прошлый Type"
-                sheet_end.cell(row=16, column=9).value = "Прошлый комментарий"
-
-                for row in range(16, 150):
-                    
-                    cell_value = sheet.cell(row=row, column=1).value
-
-                    if cell_value != None:
-                    
-                        if cell_value == "Да":
-                            value_name_first = sheet.cell(row=row, column=4).value
-                            value_name_end = sheet_end.cell(row=row, column=4).value
-
-                            value_type_first = sheet.cell(row=row, column=5).value
-                            value_type_end = sheet_end.cell(row=row, column=5).value
-
-                            if (value_name_first == value_name_end) and (value_type_first == value_type_end):
-                                sheet_end.cell(row=row, column=1).value = "Да"
-                            else:
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=7).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=8).value = sheet_middle.cell(row=row, column=5).value
-                                sheet_end.cell(row=row, column=9).value = sheet_middle.cell(row=row, column=2).value
-                        else:
-                            value_name_first = sheet.cell(row=row, column=4).value
-                            value_name_end = sheet_end.cell(row=row, column=4).value
-
-                            value_type_first = sheet.cell(row=row, column=5).value
-                            value_type_end = sheet_end.cell(row=row, column=5).value
-
-                            if (value_name_first == value_name_end) and (value_type_first == value_type_end):
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=7).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=8).value = sheet_middle.cell(row=row, column=5).value
-                                sheet_end.cell(row=row, column=9).value = sheet_middle.cell(row=row, column=2).value
-                            else:
-                                #sheet_end.cell(row=row, column=1).value = "Не проверено"
-                                sheet_end.cell(row=row, column=7).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=8).value = sheet_middle.cell(row=row, column=5).value
-                                sheet_end.cell(row=row, column=9).value = sheet_middle.cell(row=row, column=2).value
-
-
-
-                    #if cell_value = "Да"
-                    #print(cell_value)
-                #print("\n\n\n")
-                #print("True")
-            
-            #ch = sheet["B2"]
-            #print(ch.value)
-            #if ch.value == checker:
-            #    print("true")
-        # Здесь можно выполнять операции с листом, например, читать данные
-        #for row in sheet.iter_rows(values_only=True):
-        #   print(row)  # Вывод строк листа
-
-    output_file_path = 'example_updated.xlsx'
-    workbook_end.save(output_file_path)
+    compare(path_1, path_2, path_3, checker, 'example_updated.xlsx', True, True, False, False)

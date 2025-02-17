@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-VERSION = "1.0.0"
+VERSION = "1.0.1"
 
 import sys
 import ui_form
@@ -69,7 +69,7 @@ class MainWindow(QMainWindow):
 
 
     def compare_function(self):
-        print("Start")
+        print("starting comparing...")
         path_1 = self.ui.linePass1.text()
         path_2 = self.ui.linePass2.text()
         path_3 = self.ui.linePass3.text()
@@ -80,8 +80,13 @@ class MainWindow(QMainWindow):
         sch_allow = self.ui.checkBox_2.isChecked()
         pcb_allow = self.ui.checkBox.isChecked()
         db_allow = self.ui.checkBox_3.isChecked()
+        find_allow = self.ui.find_row.isChecked()
         #print(pcb_allow);
-        CheckLists.compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow)
+
+        no, yes = CheckLists.compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow, find_allow)
+
+        self.ui.no_label.setText('Количество "Нет": ' + str(no))
+        self.ui.yes_label.setText('Количество "Да": ' + str(yes))
 
         pass
 
