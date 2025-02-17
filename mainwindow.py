@@ -68,7 +68,20 @@ class MainWindow(QMainWindow):
 
 
     def compare_function(self):
-        print("1")
+        print("Start")
+        path_1 = self.ui.linePass1.text()
+        path_2 = self.ui.linePass2.text()
+        path_3 = self.ui.linePass3.text()
+        checker = self.ui.comboBox.currentText()
+        if checker == "Все":
+            checker = "all"
+        output_file_path = self.ui.filename_line.text() + ".xlsx"
+        sch_allow = self.ui.checkBox_2.isChecked()
+        pcb_allow = self.ui.checkBox.isChecked()
+        db_allow = self.ui.checkBox_3.isChecked()
+        #print(pcb_allow);
+        CheckLists.compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow)
+
         pass
 
 

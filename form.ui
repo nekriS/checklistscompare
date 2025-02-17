@@ -363,6 +363,9 @@
      <property name="text">
       <string>Schematic</string>
      </property>
+     <property name="checked">
+      <bool>false</bool>
+     </property>
     </widget>
     <widget class="QCheckBox" name="checkBox_3">
      <property name="geometry">
@@ -391,7 +394,7 @@
      <string>Сравнить</string>
     </property>
    </widget>
-   <widget class="QLineEdit" name="linePass3_2">
+   <widget class="QLineEdit" name="filename_line">
     <property name="geometry">
      <rect>
       <x>10</x>
@@ -401,10 +404,10 @@
      </rect>
     </property>
     <property name="text">
-     <string>Файл не выбран</string>
+     <string>output_checklist</string>
     </property>
     <property name="readOnly">
-     <bool>true</bool>
+     <bool>false</bool>
     </property>
    </widget>
    <widget class="QLabel" name="label_15">
