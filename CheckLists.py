@@ -99,7 +99,7 @@ def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_all
 
 
         if (" Sch" in sheet_name) and sch_allow:
-            print(sheet_name)
+            #print(sheet_name)
             sheet = workbook[sheet_name]  # Получение объекта листа по имени
             sheet_middle = workbook_middle[sheet_name]
 
