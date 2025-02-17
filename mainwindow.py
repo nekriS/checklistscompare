@@ -5,7 +5,7 @@ import sys
 import ui_form
 import CheckLists
 
-from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog
+from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
 
 # Important:
 # You need to run the following command to generate the ui_form.py file
@@ -25,6 +25,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton.clicked.connect(self.pushButton_clicked)
         self.ui.pushButton_2.clicked.connect(self.pushButton_2_clicked)
         self.ui.pushButton_3.clicked.connect(self.pushButton_3_clicked)
+        self.ui.action.triggered.connect(self.show_about_dialog)
 
         self.ui.Compare.clicked.connect(self.compare_function)
 
@@ -83,6 +84,19 @@ class MainWindow(QMainWindow):
         CheckLists.compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow)
 
         pass
+
+    def show_about_dialog(self):
+            """Показывает диалог 'О программе'"""
+            QMessageBox.about(
+                self,
+                "О программе",
+                "Название программы: CheckListsCompare    \n"
+                "Версия: 1.0.0\n"
+                "Автор: Лев Кириллов\n"
+                "Год: 2025\n"
+                "\n"
+                "Программа для сравнения челистов."
+            )
 
 
 

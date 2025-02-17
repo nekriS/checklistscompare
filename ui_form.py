@@ -33,6 +33,8 @@ class Ui_MainWindow(object):
         MainWindow.setMinimumSize(QSize(650, 330))
         MainWindow.setMaximumSize(QSize(650, 330))
         MainWindow.setDockOptions(QMainWindow.AllowTabbedDocks|QMainWindow.AnimatedDocks)
+        self.action = QAction(MainWindow)
+        self.action.setObjectName(u"action")
         self.centralwidget = QWidget(MainWindow)
         self.centralwidget.setObjectName(u"centralwidget")
         self.pushButton = QPushButton(self.centralwidget)
@@ -136,6 +138,7 @@ class Ui_MainWindow(object):
         MainWindow.setMenuBar(self.menubar)
 
         self.menubar.addAction(self.menu.menuAction())
+        self.menu.addAction(self.action)
 
         self.retranslateUi(MainWindow)
 
@@ -144,6 +147,7 @@ class Ui_MainWindow(object):
 
     def retranslateUi(self, MainWindow):
         MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"CheckListCompare", None))
+        self.action.setText(QCoreApplication.translate("MainWindow", u"\u041e \u043f\u0440\u043e\u0433\u0440\u0430\u043c\u043c\u0435", None))
         self.pushButton.setText(QCoreApplication.translate("MainWindow", u"\u0412\u044b\u0431\u0440\u0430\u0442\u044c \u0444\u0430\u0439\u043b", None))
         self.label_2.setText(QCoreApplication.translate("MainWindow", u"\u0424\u0430\u0439\u043b \u043f\u043e\u0441\u043b\u0435 1-\u043e\u0439 \u043f\u0440\u043e\u0432\u0435\u0440\u043a\u0438:", None))
         self.linePass1.setText(QCoreApplication.translate("MainWindow", u"\u0424\u0430\u0439\u043b \u043d\u0435 \u0432\u044b\u0431\u0440\u0430\u043d", None))
