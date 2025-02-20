@@ -1,12 +1,12 @@
 # This Python file uses the following encoding: utf-8
-VERSION = "1.0.2"
+VERSION = "1.0.3"
 
 import sys
-import ui_form
+import os
 import CheckLists
 
 from PySide6.QtWidgets import QApplication, QMainWindow, QFileDialog, QMessageBox
-
+from PySide6.QtGui import QIcon
 # Important:
 # You need to run the following command to generate the ui_form.py file
 #     pyside6-uic form.ui -o ui_form.py, or
@@ -17,13 +17,23 @@ from pathlib import Path
 from datetime import datetime
 
 
+def resource_path(relative_path):
+    """Получить абсолютный путь к ресурсу, работоспособный как для скрипта, так и для exe."""
+    try:
+        # PyInstaller создает временную директорию и хранит пути в _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
 
+    return os.path.join(base_path, relative_path)
 
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.ui = Ui_MainWindow()
+        icon_path = resource_path("icon.png")
+        self.setWindowIcon(QIcon(icon_path))
 
         self.ui.setupUi(self)
         self.ui.pushButton.clicked.connect(self.pushButton_clicked)
@@ -73,30 +83,33 @@ class MainWindow(QMainWindow):
 
 
     def compare_function(self):
-        print("starting comparing...")
+
+        CheckLists.log("Starting comparing...")
+        #print("starting comparing...")
         path_1 = self.ui.linePass1.text()
         path_2 = self.ui.linePass2.text()
         path_3 = self.ui.linePass3.text()
 
-        checker_options = CheckLists.options();
+        compare_options = CheckLists.options();
 
         checker = self.ui.comboBox.currentText()
         if checker == "Все":
             checker = "all"
 
-        checker_options.output_file_path = self.ui.filename_line.text() + ".xlsx"
-        checker_options.sch_allow = self.ui.checkBox_2.isChecked()
-        checker_options.pcb_allow = self.ui.checkBox.isChecked()
-        checker_options.db_allow = self.ui.checkBox_3.isChecked()
-        checker_options.find_allow = self.ui.find_row.isChecked()
-        checker_options.checker_flow = self.ui.checker_flow.isChecked()
+        compare_options.output_file_path = self.ui.filename_line.text() + ".xlsx"
+        compare_options.sch_allow = self.ui.checkBox_2.isChecked()
+        compare_options.pcb_allow = self.ui.checkBox.isChecked()
+        compare_options.db_allow = self.ui.checkBox_3.isChecked()
+        compare_options.find_allow = self.ui.find_row.isChecked()
+        compare_options.checker_flow = self.ui.checker_flow.isChecked()
         #print(pcb_allow);
 
-        no, yes = CheckLists.compare(path_1, path_2, path_3, checker, checker_options)
+        no, yes = CheckLists.compare(path_1, path_2, path_3, checker, compare_options)
 
         self.ui.no_label.setText('Количество "Нет": ' + str(no))
         self.ui.yes_label.setText('Количество "Да": ' + str(yes))
 
+        CheckLists.log("Comparing is complete!")
         pass
 
     def show_about_dialog(self):

@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 import openpyxl
+import os
+import datetime
 
 class options:
     def __init__(self, output_file_path = "default_name.xlsx", sch_allow = True, db_allow = True, pcb_allow = False, find_allow = False, checker_flow = False):
@@ -9,6 +11,31 @@ class options:
         self.pcb_allow = pcb_allow        # разрешение на проверку листов pcb
         self.find_allow = find_allow        # разрешение на поиск позиций в чек листе
         self.checker_flow = checker_flow        # разрешение на перенос исполнителей
+
+
+def log(text):
+    # Получаем сегодняшнюю дату в формате YYYY-MM-DD
+    today_date = datetime.datetime.now().strftime('%Y-%m-%d')
+
+    # Создаем путь к каталогу и файлу
+    log_directory = 'log'
+    log_file_name = f'log_{today_date}.txt'
+    log_file_path = os.path.join(log_directory, log_file_name)
+
+    # Проверяем наличие каталога "log" и создаем его, если его нет
+    if not os.path.exists(log_directory):
+        os.makedirs(log_directory)
+
+    # Формируем строку для записи: "дата-время > текст"
+    current_time = datetime.datetime.now().strftime('%H-%M-%S')
+    log_entry = f"{today_date}-{current_time} > {text}\n"
+
+    # Проверяем existence файла и записываем данные
+    with open(log_file_path, 'a', encoding='utf-8') as file:
+        file.write(log_entry)
+
+    print(text)
+
 
 def read_cell_range(sheet, start_row, end_row, start_col, end_col):
     """
@@ -89,7 +116,8 @@ def compare(path_1, path_2, path_3, checker, options):
             try:
                 sheet_end = workbook_end[sheet_name]  # Получение объекта листа по имени
             except:
-                print("Листа " + sheet_name + " не обнаружено!")
+                log("Листа " + sheet_name + " не обнаружено!")
+                #print("Листа " + sheet_name + " не обнаружено!")
                 continue
 
             part_number = sheet["B1"].value
@@ -136,7 +164,7 @@ def compare(path_1, path_2, path_3, checker, options):
             try:
                 sheet_end = workbook_end[sheet_name]  # Получение объекта листа по имени
             except:
-                print("Листа " + sheet_name + " не обнаружено!")
+                log("Листа " + sheet_name + " не обнаружено!")
                 continue
 
             part_number = sheet["B1"].value
@@ -203,7 +231,7 @@ def compare(path_1, path_2, path_3, checker, options):
                         if options.find_allow:
                             row_3 = findrow(sheet_end, sheet.cell(row=row, column=3).value, 17, max_strings)
                             if row_3 == -1:
-                                print(str(part_number) + ": Параметр " + str(sheet.cell(row=row, column=3).value) + " не найден!")
+                                log(str(part_number) + "> Параметр " + str(sheet.cell(row=row, column=3).value) + " не найден!")
                                 continue
                         else:
                             row_3 = row
