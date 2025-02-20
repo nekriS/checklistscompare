@@ -38,8 +38,8 @@ def findrow(sheet, number, start_row, end_row):
             return row
     return row
 
-def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow, find_allow):
-
+def compare(path_1, path_2, path_3, checker, options):
+# output_file_path, sch_allow, db_allow, pcb_allow, find_allow
     no = 0
     yes = 0
 
@@ -64,7 +64,7 @@ def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_all
     #print(CHs)
 
     for sheet_name in sheet_names:
-        if (" DB" in sheet_name) and db_allow:
+        if (" DB" in sheet_name) and options.db_allow:
             #print(sheet_name)
             sheet = workbook[sheet_name]  # Получение объекта листа по имени
             sheet_middle = workbook_middle[sheet_name]
@@ -111,7 +111,7 @@ def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_all
                                 sheet_end.cell(row=row, column=6).value = sheet_middle.cell(row=row, column=2).value
 
 
-        if (" Sch" in sheet_name) and sch_allow:
+        if (" Sch" in sheet_name) and options.sch_allow:
             #print(sheet_name)
             sheet = workbook[sheet_name]  # Получение объекта листа по имени
             sheet_middle = workbook_middle[sheet_name]
@@ -183,7 +183,7 @@ def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_all
 
                     if cell_value != None:
 
-                        if find_allow:
+                        if options.find_allow:
                             row_3 = findrow(sheet_end, sheet.cell(row=row, column=3).value, 17, max_strings)
                         else:
                             row_3 = row
@@ -225,7 +225,7 @@ def compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_all
                                 sheet_end.cell(row=row_3, column=9).value = sheet_middle.cell(row=row, column=2).value
 
     #output_file_path = 'example_updated.xlsx'
-    workbook_end.save(output_file_path)
+    workbook_end.save(options.output_file_path)
 
     return [no, yes]
 

@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-VERSION = "1.0.1"
+VERSION = "1.0.2"
 
 import sys
 import ui_form
@@ -15,6 +15,15 @@ from ui_form import Ui_MainWindow
 
 from pathlib import Path
 from datetime import datetime
+
+class options:
+    def __init__(self, output_file_path = "default_name", sch_allow = True, db_allow = True, pcb_allow = False, find_allow = False):
+        self.output_file_path = output_file_path    # имя выходного файла
+        self.sch_allow = sch_allow        # разрешение на проверку листов схемотехники
+        self.db_allow = db_allow        # разрешение на проверку листов базы данных
+        self.pcb_allow = pcb_allow        # разрешение на проверку листов pcb
+        self.find_allow = find_allow        # разрешение на поиск позиций в чек листе
+
 
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
@@ -73,17 +82,21 @@ class MainWindow(QMainWindow):
         path_1 = self.ui.linePass1.text()
         path_2 = self.ui.linePass2.text()
         path_3 = self.ui.linePass3.text()
+
+        checker_options = options();
+
         checker = self.ui.comboBox.currentText()
         if checker == "Все":
             checker = "all"
-        output_file_path = self.ui.filename_line.text() + ".xlsx"
-        sch_allow = self.ui.checkBox_2.isChecked()
-        pcb_allow = self.ui.checkBox.isChecked()
-        db_allow = self.ui.checkBox_3.isChecked()
-        find_allow = self.ui.find_row.isChecked()
+
+        checker_options.output_file_path = self.ui.filename_line.text() + ".xlsx"
+        checker_options.sch_allow = self.ui.checkBox_2.isChecked()
+        checker_options.pcb_allow = self.ui.checkBox.isChecked()
+        checker_options.db_allow = self.ui.checkBox_3.isChecked()
+        checker_options.find_allow = self.ui.find_row.isChecked()
         #print(pcb_allow);
 
-        no, yes = CheckLists.compare(path_1, path_2, path_3, checker, output_file_path, sch_allow, db_allow, pcb_allow, find_allow)
+        no, yes = CheckLists.compare(path_1, path_2, path_3, checker, checker_options)
 
         self.ui.no_label.setText('Количество "Нет": ' + str(no))
         self.ui.yes_label.setText('Количество "Да": ' + str(yes))
@@ -96,11 +109,11 @@ class MainWindow(QMainWindow):
                 self,
                 "О программе",
                 "Название программы: CheckListsCompare    \n"
-                "Версия: 1.0.0\n"
+                "Версия: " + VERSION + "\n"
                 "Автор: Лев Кириллов\n"
                 "Год: 2025\n"
                 "\n"
-                "Программа для сравнения челистов."
+                "Программа для сравнения чеклистов."
             )
 
 
