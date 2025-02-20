@@ -1,7 +1,14 @@
 # -*- coding: utf-8 -*-
 import openpyxl
 
-
+class options:
+    def __init__(self, output_file_path = "default_name.xlsx", sch_allow = True, db_allow = True, pcb_allow = False, find_allow = False, checker_flow = False):
+        self.output_file_path = output_file_path    # имя выходного файла
+        self.sch_allow = sch_allow        # разрешение на проверку листов схемотехники
+        self.db_allow = db_allow        # разрешение на проверку листов базы данных
+        self.pcb_allow = pcb_allow        # разрешение на проверку листов pcb
+        self.find_allow = find_allow        # разрешение на поиск позиций в чек листе
+        self.checker_flow = checker_flow        # разрешение на перенос исполнителей
 
 def read_cell_range(sheet, start_row, end_row, start_col, end_col):
     """
@@ -31,15 +38,14 @@ def mas_no_mas(massive):
     return out_massive
 
 
-def findrow(sheet, number, start_row, end_row):
-    row = -1
+def findrow(sheet, number, start_row, end_row, column = 3):
     for row in range(start_row, end_row):
-        if sheet.cell(row=row, column=3).value == number:
+        if sheet.cell(row=row, column=column).value == number:
             return row
-    return row
+    return -1
 
 def compare(path_1, path_2, path_3, checker, options):
-# output_file_path, sch_allow, db_allow, pcb_allow, find_allow
+# параметры в options: output_file_path, sch_allow, db_allow, pcb_allow, find_allow
     no = 0
     yes = 0
 
@@ -50,9 +56,20 @@ def compare(path_1, path_2, path_3, checker, options):
     sheet_names = workbook.sheetnames
 
     main_sheet = workbook.worksheets[0]
+    main_sheet_end = workbook_end.worksheets[0]
 
     PNs = mas_no_mas(read_cell_range(main_sheet, 8, 50, 2, 2))
     CHs = mas_no_mas(read_cell_range(main_sheet, 8, 50, 6, 6))
+
+    if options.checker_flow:
+        for row in range(8, 60):
+            cell_value = main_sheet.cell(row=row, column=1).value
+            if cell_value != None:
+                row_end = findrow(main_sheet_end, main_sheet.cell(row=row, column=2).value, 8, 60, 2)
+                if row_end != -1:
+                    main_sheet_end.cell(row=row_end, column=6).value = main_sheet.cell(row=row, column=6).value
+
+
 
     # определяем компоненты которые нужно проверить по параметру "кто проверяет"
     if checker != "all":
@@ -63,7 +80,7 @@ def compare(path_1, path_2, path_3, checker, options):
     #print(PNs)
     #print(CHs)
 
-    for sheet_name in sheet_names:
+    for sheet_name in sheet_names[1:]:
         if (" DB" in sheet_name) and options.db_allow:
             #print(sheet_name)
             sheet = workbook[sheet_name]  # Получение объекта листа по имени
@@ -185,6 +202,9 @@ def compare(path_1, path_2, path_3, checker, options):
 
                         if options.find_allow:
                             row_3 = findrow(sheet_end, sheet.cell(row=row, column=3).value, 17, max_strings)
+                            if row_3 == -1:
+                                print(str(part_number) + ": Параметр " + str(sheet.cell(row=row, column=3).value) + " не найден!")
+                                continue
                         else:
                             row_3 = row
                         #print(row);
@@ -237,4 +257,6 @@ if __name__ == "__main__":
 
     checker = ""
 
-    compare(path_1, path_2, path_3, checker, 'example_updated.xlsx', True, True, False, False)
+    default_options = options()
+
+    compare(path_1, path_2, path_3, checker, default_options)

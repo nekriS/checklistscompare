@@ -16,13 +16,8 @@ from ui_form import Ui_MainWindow
 from pathlib import Path
 from datetime import datetime
 
-class options:
-    def __init__(self, output_file_path = "default_name", sch_allow = True, db_allow = True, pcb_allow = False, find_allow = False):
-        self.output_file_path = output_file_path    # имя выходного файла
-        self.sch_allow = sch_allow        # разрешение на проверку листов схемотехники
-        self.db_allow = db_allow        # разрешение на проверку листов базы данных
-        self.pcb_allow = pcb_allow        # разрешение на проверку листов pcb
-        self.find_allow = find_allow        # разрешение на поиск позиций в чек листе
+
+
 
 
 class MainWindow(QMainWindow):
@@ -83,7 +78,7 @@ class MainWindow(QMainWindow):
         path_2 = self.ui.linePass2.text()
         path_3 = self.ui.linePass3.text()
 
-        checker_options = options();
+        checker_options = CheckLists.options();
 
         checker = self.ui.comboBox.currentText()
         if checker == "Все":
@@ -94,6 +89,7 @@ class MainWindow(QMainWindow):
         checker_options.pcb_allow = self.ui.checkBox.isChecked()
         checker_options.db_allow = self.ui.checkBox_3.isChecked()
         checker_options.find_allow = self.ui.find_row.isChecked()
+        checker_options.checker_flow = self.ui.checker_flow.isChecked()
         #print(pcb_allow);
 
         no, yes = CheckLists.compare(path_1, path_2, path_3, checker, checker_options)

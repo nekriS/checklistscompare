@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>650</width>
-    <height>402</height>
+    <height>422</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -19,13 +19,13 @@
   <property name="minimumSize">
    <size>
     <width>650</width>
-    <height>402</height>
+    <height>422</height>
    </size>
   </property>
   <property name="maximumSize">
    <size>
     <width>650</width>
-    <height>402</height>
+    <height>422</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -293,7 +293,7 @@
       <x>10</x>
       <y>160</y>
       <width>631</width>
-      <height>81</height>
+      <height>101</height>
      </rect>
     </property>
     <property name="title">
@@ -429,12 +429,37 @@
       <bool>true</bool>
      </property>
     </widget>
+    <widget class="QCheckBox" name="checker_flow">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>70</y>
+       <width>201</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="toolTip">
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Переносит проверяющих с первого файла в итоговый.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+     </property>
+     <property name="statusTip">
+      <string/>
+     </property>
+     <property name="whatsThis">
+      <string/>
+     </property>
+     <property name="text">
+      <string>Перенести проверяющих</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </widget>
    <widget class="QPushButton" name="Compare">
     <property name="geometry">
      <rect>
       <x>530</x>
-      <y>270</y>
+      <y>290</y>
       <width>111</width>
       <height>24</height>
      </rect>
@@ -447,7 +472,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>270</y>
+      <y>290</y>
       <width>511</width>
       <height>22</height>
      </rect>
@@ -475,7 +500,7 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>250</y>
+      <y>270</y>
       <width>261</width>
       <height>21</height>
      </rect>
@@ -488,7 +513,7 @@
     <property name="geometry">
      <rect>
       <x>9</x>
-      <y>300</y>
+      <y>320</y>
       <width>631</width>
       <height>71</height>
      </rect>
