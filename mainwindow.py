@@ -1,5 +1,5 @@
 # This Python file uses the following encoding: utf-8
-VERSION = "1.0.3"
+VERSION = "1.0.4"
 
 import sys
 import os
@@ -40,6 +40,7 @@ class MainWindow(QMainWindow):
         self.ui.pushButton_2.clicked.connect(self.pushButton_2_clicked)
         self.ui.pushButton_3.clicked.connect(self.pushButton_3_clicked)
         self.ui.action.triggered.connect(self.show_about_dialog)
+        self.ui.two_file.clicked.connect(self.two_file_en)
 
         self.ui.Compare.clicked.connect(self.compare_function)
 
@@ -50,6 +51,17 @@ class MainWindow(QMainWindow):
         modification_time = file_path.stat().st_mtime
         modification_date = datetime.fromtimestamp(modification_time)
         return modification_date.strftime("%Y-%m-%d %H:%M:%S")
+
+    def two_file_en(self):
+        status = self.ui.two_file.isChecked()
+        if status == True:
+            self.ui.pushButton_2.setEnabled(True)
+            self.ui.datePass2.setEnabled(True)
+            self.ui.linePass2.setEnabled(True)
+        else:
+            self.ui.pushButton_2.setEnabled(False)
+            self.ui.datePass2.setEnabled(False)
+            self.ui.linePass2.setEnabled(False)
 
     def pushButton_clicked(self):
         file_path = self.open_file_dialog()
@@ -84,10 +96,14 @@ class MainWindow(QMainWindow):
 
     def compare_function(self):
 
-        CheckLists.log("Starting comparing...")
+        log_object = self.ui.logplace
+        CheckLists.log("Начинается сравнение...", log_object)
         #print("starting comparing...")
         path_1 = self.ui.linePass1.text()
-        path_2 = self.ui.linePass2.text()
+        if self.ui.two_file.isChecked():
+            path_2 = self.ui.linePass2.text()
+        else:
+            path_2 = path_1
         path_3 = self.ui.linePass3.text()
 
         compare_options = CheckLists.options();
@@ -102,14 +118,20 @@ class MainWindow(QMainWindow):
         compare_options.db_allow = self.ui.checkBox_3.isChecked()
         compare_options.find_allow = self.ui.find_row.isChecked()
         compare_options.checker_flow = self.ui.checker_flow.isChecked()
-        #print(pcb_allow);
+        compare_options.open_file = self.ui.openfile.isChecked()
 
-        no, yes = CheckLists.compare(path_1, path_2, path_3, checker, compare_options)
 
-        self.ui.no_label.setText('Количество "Нет": ' + str(no))
-        self.ui.yes_label.setText('Количество "Да": ' + str(yes))
 
-        CheckLists.log("Comparing is complete!")
+        no, yes, warn = CheckLists.compare(path_1, path_2, path_3, checker, compare_options, log_object)
+
+        self.ui.no_label.setText('Нет: ' + str(no))
+        self.ui.yes_label.setText('Да: ' + str(yes))
+        self.ui.warn_label.setText('Предупреждений: ' + str(warn))
+
+        CheckLists.log("Сравнение завершено!", log_object)
+
+
+
         pass
 
     def show_about_dialog(self):

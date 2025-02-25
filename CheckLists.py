@@ -4,16 +4,17 @@ import os
 import datetime
 
 class options:
-    def __init__(self, output_file_path = "default_name.xlsx", sch_allow = True, db_allow = True, pcb_allow = False, find_allow = False, checker_flow = False):
+    def __init__(self, output_file_path = "default_name.xlsx", sch_allow = True, db_allow = True, pcb_allow = False, find_allow = False, checker_flow = False, open_file = False):
         self.output_file_path = output_file_path    # имя выходного файла
         self.sch_allow = sch_allow        # разрешение на проверку листов схемотехники
         self.db_allow = db_allow        # разрешение на проверку листов базы данных
         self.pcb_allow = pcb_allow        # разрешение на проверку листов pcb
         self.find_allow = find_allow        # разрешение на поиск позиций в чек листе
         self.checker_flow = checker_flow        # разрешение на перенос исполнителей
+        self.open_file = open_file
 
 
-def log(text):
+def log(text, log_object):
     # Получаем сегодняшнюю дату в формате YYYY-MM-DD
     today_date = datetime.datetime.now().strftime('%Y-%m-%d')
 
@@ -27,14 +28,17 @@ def log(text):
         os.makedirs(log_directory)
 
     # Формируем строку для записи: "дата-время > текст"
-    current_time = datetime.datetime.now().strftime('%H-%M-%S')
-    log_entry = f"{today_date}-{current_time} > {text}\n"
+    current_time = datetime.datetime.now().strftime('%H:%M:%S')
+    log_entry = f"{today_date} {current_time} > {text}"
 
     # Проверяем existence файла и записываем данные
     with open(log_file_path, 'a', encoding='utf-8') as file:
-        file.write(log_entry)
+        file.write(log_entry+"\n")
 
-    print(text)
+    log_object.append(log_entry)
+
+
+    print(log_entry)
 
 
 def read_cell_range(sheet, start_row, end_row, start_col, end_col):
@@ -71,32 +75,63 @@ def findrow(sheet, number, start_row, end_row, column = 3):
             return row
     return -1
 
-def compare(path_1, path_2, path_3, checker, options):
-# параметры в options: output_file_path, sch_allow, db_allow, pcb_allow, find_allow
+def howmanyrows(sheet, start = 1):
+
+    class rows_class:
+        def __init__(self, start_row = -1, end_row = -1):
+            self.start_row = start_row    # начальная строка
+            self.end_row = end_row    # конечная строка
+
+    rows = rows_class()
+    row = start
+
+    while (rows.end_row == -1) or (row == 10^3):
+        cell_value = sheet.cell(row=row, column=1).value
+        if (("Да" in str(cell_value))  and ("Нет" in str(cell_value)) and ("Не проверено" in str(cell_value))) or (str(cell_value) in "ДаНетНе проверено"):
+            if rows.start_row == -1:
+                rows.start_row = row
+        elif rows.start_row != -1:
+            rows.end_row = row - 1
+        row += 1
+
+
+    return rows
+
+def compare(path_1, path_2, path_3, checker, options, log_object):
+    # параметры в options: output_file_path, sch_allow, db_allow, pcb_allow, find_allow
     no = 0
     yes = 0
+    warn = 0
 
-    workbook = openpyxl.load_workbook(path_1)
-    workbook_middle = openpyxl.load_workbook(path_2)
-    workbook_end = openpyxl.load_workbook(path_3)
+    try:
+        workbook = openpyxl.load_workbook(path_1)
+        workbook_middle = openpyxl.load_workbook(path_2)
+        workbook_end = openpyxl.load_workbook(path_3)
+    except:
+        log("Файлы не доступны для открытия!", log_object)
+        return [no, yes, warn]
 
     sheet_names = workbook.sheetnames
 
     main_sheet = workbook.worksheets[0]
+
+    rw = howmanyrows(main_sheet)
+    #print(rw.start_row)
+    #print(rw.end_row)
+
     main_sheet_end = workbook_end.worksheets[0]
 
-    PNs = mas_no_mas(read_cell_range(main_sheet, 8, 50, 2, 2))
-    CHs = mas_no_mas(read_cell_range(main_sheet, 8, 50, 6, 6))
+    PNs = mas_no_mas(read_cell_range(main_sheet, rw.start_row, rw.end_row, 2, 2))
+    CHs = mas_no_mas(read_cell_range(main_sheet, rw.start_row, rw.end_row, 6, 6))
 
+    # перенос проверяющих
     if options.checker_flow:
-        for row in range(8, 60):
+        for row in range(rw.start_row, rw.end_row):
             cell_value = main_sheet.cell(row=row, column=1).value
             if cell_value != None:
                 row_end = findrow(main_sheet_end, main_sheet.cell(row=row, column=2).value, 8, 60, 2)
                 if row_end != -1:
                     main_sheet_end.cell(row=row_end, column=6).value = main_sheet.cell(row=row, column=6).value
-
-
 
     # определяем компоненты которые нужно проверить по параметру "кто проверяет"
     if checker != "all":
@@ -104,31 +139,34 @@ def compare(path_1, path_2, path_3, checker, options):
             if CHs[ch_n] != checker:
                 PNs.pop(ch_n)
 
-    #print(PNs)
-    #print(CHs)
 
     for sheet_name in sheet_names[1:]:
+
+        sheet = workbook[sheet_name]  # Получение объекта листа по имени
+        sheet_middle = workbook_middle[sheet_name]
+
+
+        #print(rw.start_row)
+        #print(rw.end_row)
+
+        try:
+            sheet_end = workbook_end[sheet_name]  # Получение объекта листа по имени
+        except:
+            log("Листа " + sheet_name + " не обнаружено!", log_object)
+            warn += 1
+            continue
+
+        part_number = sheet["B1"].value
+
         if (" DB" in sheet_name) and options.db_allow:
-            #print(sheet_name)
-            sheet = workbook[sheet_name]  # Получение объекта листа по имени
-            sheet_middle = workbook_middle[sheet_name]
-
-            try:
-                sheet_end = workbook_end[sheet_name]  # Получение объекта листа по имени
-            except:
-                log("Листа " + sheet_name + " не обнаружено!")
-                #print("Листа " + sheet_name + " не обнаружено!")
-                continue
-
-            part_number = sheet["B1"].value
-
+            rw = howmanyrows(sheet)
             if part_number in PNs:
 
                 #data = read_cell_range(sheet, 8, 54, 1, 4)
                 sheet_end.cell(row=7, column=5).value = "1. Значение"
                 sheet_end.cell(row=7, column=6).value = "2. Комментарий"
 
-                for row in range(8, 60):
+                for row in range(rw.start_row, rw.end_row):
 
                     cell_value = sheet.cell(row=row, column=1).value
 
@@ -157,18 +195,7 @@ def compare(path_1, path_2, path_3, checker, options):
 
 
         if (" Sch" in sheet_name) and options.sch_allow:
-            #print(sheet_name)
-            sheet = workbook[sheet_name]  # Получение объекта листа по имени
-            sheet_middle = workbook_middle[sheet_name]
-
-            try:
-                sheet_end = workbook_end[sheet_name]  # Получение объекта листа по имени
-            except:
-                log("Листа " + sheet_name + " не обнаружено!")
-                continue
-
-            part_number = sheet["B1"].value
-
+            rw = howmanyrows(sheet, 14)
             if part_number in PNs:
 
                 # проверка шапки
@@ -231,7 +258,8 @@ def compare(path_1, path_2, path_3, checker, options):
                         if options.find_allow:
                             row_3 = findrow(sheet_end, sheet.cell(row=row, column=3).value, 17, max_strings)
                             if row_3 == -1:
-                                log(str(part_number) + "> Параметр " + str(sheet.cell(row=row, column=3).value) + " не найден!")
+                                log(str(part_number) + " > Параметр " + str(sheet.cell(row=row, column=3).value) + " не найден!", log_object)
+                                warn += 1
                                 continue
                         else:
                             row_3 = row
@@ -273,9 +301,16 @@ def compare(path_1, path_2, path_3, checker, options):
                                 sheet_end.cell(row=row_3, column=9).value = sheet_middle.cell(row=row, column=2).value
 
     #output_file_path = 'example_updated.xlsx'
+
     workbook_end.save(options.output_file_path)
 
-    return [no, yes]
+    try:
+        if options.open_file:
+            os.startfile(options.output_file_path)
+    except:
+        log("Не удалось открыть полученный файл!", log_object)
+
+    return [no, yes, warn]
 
 if __name__ == "__main__":
 
