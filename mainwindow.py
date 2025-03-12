@@ -1,5 +1,6 @@
 # This Python file uses the following encoding: utf-8
-VERSION = "1.0.4"
+VERSION = "1.0.5"
+DATE = "12.03.2025"
 
 import sys
 import os
@@ -82,16 +83,16 @@ class MainWindow(QMainWindow):
         self.ui.datePass3.setText(f"{temp_time}")
 
     def open_file_dialog(self):
-            """Открывает диалоговое окно для выбора файла"""
-            options = QFileDialog.Options()  # Опции диалогового окна
-            file_path, _ = QFileDialog.getOpenFileName(
-                self,
-                "Выберите файл",
-                "",  # Начальная директория (пустая строка означает текущую директорию)
-                "Все файлы (*);;Текстовые файлы (*.txt)",  # Фильтр типов файлов
-                options=options
-            )
-            return file_path
+        """Открывает диалоговое окно для выбора файла"""
+        options = QFileDialog.Options()  # Опции диалогового окна
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Выберите файл",
+            "",  # Начальная директория (пустая строка означает текущую директорию)
+            "Все файлы (*);;Текстовые файлы (*.txt)",  # Фильтр типов файлов
+            options=options
+        )
+        return file_path
 
 
     def compare_function(self):
@@ -142,7 +143,7 @@ class MainWindow(QMainWindow):
                 "Название программы: CheckListsCompare    \n"
                 "Версия: " + VERSION + "\n"
                 "Автор: Лев Кириллов\n"
-                "Год: 2025\n"
+                "Дата сборки: " + DATE + "\n"
                 "\n"
                 "Программа для сравнения чеклистов."
             )

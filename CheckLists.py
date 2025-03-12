@@ -85,16 +85,14 @@ def howmanyrows(sheet, start = 1):
     rows = rows_class()
     row = start
 
-    while (rows.end_row == -1) or (row == 10^3):
+    while (rows.end_row == -1) and (row <= 1000):
         cell_value = sheet.cell(row=row, column=1).value
         if (("Да" in str(cell_value))  and ("Нет" in str(cell_value)) and ("Не проверено" in str(cell_value))) or (str(cell_value) in "ДаНетНе проверено"):
             if rows.start_row == -1:
                 rows.start_row = row
         elif rows.start_row != -1:
-            rows.end_row = row - 1
+            rows.end_row = row
         row += 1
-
-
     return rows
 
 def compare(path_1, path_2, path_3, checker, options, log_object):
@@ -121,8 +119,7 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
 
     main_sheet_end = workbook_end.worksheets[0]
 
-    PNs = mas_no_mas(read_cell_range(main_sheet, rw.start_row, rw.end_row, 2, 2))
-    CHs = mas_no_mas(read_cell_range(main_sheet, rw.start_row, rw.end_row, 6, 6))
+
 
     # перенос проверяющих
     if options.checker_flow:
@@ -132,8 +129,13 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
                 row_end = findrow(main_sheet_end, main_sheet.cell(row=row, column=2).value, 8, 60, 2)
                 if row_end != -1:
                     main_sheet_end.cell(row=row_end, column=6).value = main_sheet.cell(row=row, column=6).value
+                else:
+                    log("Компонента " + main_sheet.cell(row=row, column=2).value + " не обнаружено!", log_object)
+                    warn += 1
 
     # определяем компоненты которые нужно проверить по параметру "кто проверяет"
+    PNs = mas_no_mas(read_cell_range(main_sheet, rw.start_row, rw.end_row, 2, 2))
+    CHs = mas_no_mas(read_cell_range(main_sheet, rw.start_row, rw.end_row, 6, 6))
     if checker != "all":
         for ch_n in reversed(range(len(CHs))):
             if CHs[ch_n] != checker:
@@ -160,6 +162,14 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
 
         if (" DB" in sheet_name) and options.db_allow:
             rw = howmanyrows(sheet)
+            rw2 = howmanyrows(sheet_end)
+
+            # выясняем в каком листе больше строчек
+            #if (rw2.end_row - rw2.start_row) > (rw1.end_row - rw1.start_row):
+            #    rw = rw2
+            #else:
+            #    rw = rw1
+
             if part_number in PNs:
 
                 #data = read_cell_range(sheet, 8, 54, 1, 4)
@@ -172,26 +182,44 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
 
                     if cell_value != None:
 
+                        if options.find_allow:
+                            row_3 = findrow(sheet_end, sheet.cell(row=row, column=3).value, rw2.start_row, rw2.end_row)
+                            if row_3 == -1:
+                                log(str(part_number) + " > Параметр " + str(sheet.cell(row=row, column=3).value) + " не найден!", log_object)
+                                warn += 1
+                                continue
+                        else:
+                            row_3 = row
+
+
                         if cell_value == "Да":
                             value_first = sheet.cell(row=row, column=4).value
-                            value_end = sheet_end.cell(row=row, column=4).value
+                            value_end = sheet_end.cell(row=row_3, column=4).value
                             if value_first == value_end:
-                                sheet_end.cell(row=row, column=1).value = "Да"
+                                yes += 1
+                                sheet_end.cell(row=row_3, column=1).value = "Да"
                             else:
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=6).value = sheet_middle.cell(row=row, column=2).value
+                                no += 1
+                                sheet_end.cell(row=row_3, column=1).value = "Нет"
+                                sheet_end.cell(row=row_3, column=5).value = sheet.cell(row=row, column=4).value
+                                sheet_end.cell(row=row_3, column=6).value = sheet_middle.cell(row=row, column=2).value
+
+                                if isinstance(sheet.cell(row=row, column=4).value, float) and sheet.cell(row=row, column=4).number_format.endswith('%'):
+                                    sheet_end.cell(row=row_3, column=5).value = f"{int(sheet.cell(row=row, column=4).value * 100)}%"  # Применяем формат процентов
                         elif cell_value == "Нет":
                             value_first = sheet.cell(row=row, column=4).value
-                            value_end = sheet_end.cell(row=row, column=4).value
+                            value_end = sheet_end.cell(row=row_3, column=4).value
                             if value_first == value_end:
-                                sheet_end.cell(row=row, column=1).value = "Нет"
-                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=6).value = sheet_middle.cell(row=row, column=2).value
+                                no += 1
+                                sheet_end.cell(row=row_3, column=1).value = "Нет"
+                                sheet_end.cell(row=row_3, column=5).value = sheet.cell(row=row, column=4).value
+                                sheet_end.cell(row=row_3, column=6).value = sheet_middle.cell(row=row, column=2).value
                             else:
                                 #sheet_end.cell(row=row, column=1).value = "Не проверено"
-                                sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
-                                sheet_end.cell(row=row, column=6).value = sheet_middle.cell(row=row, column=2).value
+                                sheet_end.cell(row=row_3, column=5).value = sheet.cell(row=row, column=4).value
+                                sheet_end.cell(row=row_3, column=6).value = sheet_middle.cell(row=row, column=2).value
+                            if isinstance(sheet.cell(row=row, column=4).value, float) and sheet.cell(row=row, column=4).number_format.endswith('%'):
+                                sheet_end.cell(row=row_3, column=5).value = f"{int(sheet.cell(row=row, column=4).value * 100)}%"  # Применяем формат процентов
 
 
         if (" Sch" in sheet_name) and options.sch_allow:
@@ -210,8 +238,10 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
                             value_first = sheet.cell(row=row, column=4).value
                             value_end = sheet_end.cell(row=row, column=4).value
                             if value_first == value_end:
+                                yes += 1
                                 sheet_end.cell(row=row, column=1).value = "Да"
                             else:
+                                no += 1
                                 sheet_end.cell(row=row, column=1).value = "Нет"
                                 sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
 
@@ -224,6 +254,7 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
                             value_first = sheet.cell(row=row, column=4).value
                             value_end = sheet_end.cell(row=row, column=4).value
                             if value_first == value_end:
+                                no += 1
                                 sheet_end.cell(row=row, column=1).value = "Нет"
                                 sheet_end.cell(row=row, column=5).value = sheet.cell(row=row, column=4).value
 
@@ -249,7 +280,7 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
                 sheet_end.cell(row=16, column=8).value = "1. Type"
                 sheet_end.cell(row=16, column=9).value = "2. Комментарий"
 
-                for row in range(17, max_strings):
+                for row in range(rw.start_row, rw.end_row):
 
                     cell_value = sheet.cell(row=row, column=1).value
 
@@ -302,7 +333,10 @@ def compare(path_1, path_2, path_3, checker, options, log_object):
 
     #output_file_path = 'example_updated.xlsx'
 
-    workbook_end.save(options.output_file_path)
+    try:
+        workbook_end.save(options.output_file_path)
+    except:
+        log("Не удалось записать полученный файл!", log_object)
 
     try:
         if options.open_file:
